@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #1a1a2e;
+            background: linear-gradient(135deg, #0097d6 0%, #006ba3 100%);
             overflow: hidden;
             height: 100vh;
             width: 100vw;
@@ -29,13 +29,13 @@
         /* Top Section - Dealerships (stays visible) - 55% of screen */
         .top-section {
             flex: 0 0 55%; /* 55% of vertical space */
-            background: #0f3460;
+            background: #0097d6;
             position: relative;
-            border-bottom: 5px solid #e94560;
+            border-bottom: 5px solid #005a87;
         }
 
         .section-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0097d6 0%, #005a87 100%);
             padding: 15px 30px;
             display: flex;
             justify-content: space-between;
@@ -47,6 +47,14 @@
             color: white;
             font-size: 2.5em;
             font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .paxton-logo {
+            height: 60px;
+            width: auto;
         }
 
         .current-time {
@@ -95,7 +103,7 @@
         .bottom-section {
             flex: 0 0 45%; /* 45% of vertical space */
             position: relative;
-            background: #16213e;
+            background: #006ba3;
         }
 
         .rotating-content {
@@ -115,22 +123,22 @@
 
         /* Rotation Indicator - positioned in the header */
         .rotation-indicator {
-            background: #e94560;
+            background: #ff6b00;
             color: white;
             padding: 15px 30px;
             border-radius: 25px;
             font-size: 1.6em;
             font-weight: 700;
-            box-shadow: 0 4px 20px rgba(233, 69, 96, 0.4);
+            box-shadow: 0 4px 20px rgba(255, 107, 0, 0.4);
             animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
             0%, 100% {
-                box-shadow: 0 4px 20px rgba(233, 69, 96, 0.4);
+                box-shadow: 0 4px 20px rgba(255, 107, 0, 0.4);
             }
             50% {
-                box-shadow: 0 4px 30px rgba(233, 69, 96, 0.8);
+                box-shadow: 0 4px 30px rgba(255, 107, 0, 0.8);
             }
         }
 
@@ -161,7 +169,10 @@
         <!-- TOP SECTION: Dealerships (Fixed) -->
         <div class="top-section">
             <div class="section-header">
-                <h2>🏢 Active Dealerships</h2>
+                <h2>
+                    <img src="https://i.imgur.com/II678hk.png" class="paxton-logo" alt="Paxton Marketing">
+                    Active Dealerships
+                </h2>
                 <div class="current-time" id="currentTime"></div>
             </div>
             <div class="iframe-container">

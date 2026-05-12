@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BDC Kiosk - Vertical Display</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Top Section - Dealerships (stays visible) - 60% of screen */
+        .top-section {
+            flex: 0 0 60%; /* 60% of vertical space */
+            background: #0f3460;
+            position: relative;
+            border-bottom: 5px solid #e94560;
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .section-header h2 {
+            color: white;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        .current-time {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1.8em;
+            font-weight: 600;
+            color: white;
+        }
+
+        .iframe-container {
+            width: 100%;
+            height: calc(100% - 80px); /* Subtract header height */
+            overflow: hidden;
+            position: relative;
+        }
+
+        .iframe-container iframe {
+            border: none;
+            transform-origin: top left;
+        }
+
+        /* Dealerships - scale to fit width better */
+        .top-section .iframe-container iframe {
+            width: 120%;
+            height: 120%;
+            transform: scale(0.83);
+        }
+
+        /* Schedule - zoomed out to fit all columns */
+        #scheduleContent .iframe-container iframe {
+            width: 250%;
+            height: 250%;
+            transform: scale(0.40);
+        }
+
+        /* Performance - 10% wider than before */
+        #performanceContent .iframe-container iframe {
+            width: 128%;
+            height: 128%;
+            transform: scale(0.78);
+        }
+
+        /* Bottom Section - Rotating between Schedule & Performance - 40% of screen */
+        .bottom-section {
+            flex: 0 0 40%; /* 40% of vertical space */
+            position: relative;
+            background: #16213e;
+        }
+
+        .rotating-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.6s ease-in-out;
+        }
+
+        .rotating-content.active {
+            opacity: 1;
+            z-index: 1;
+        }
+
+        /* Rotation Indicator - positioned in the header */
+        .rotation-indicator {
+            background: #e94560;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.6em;
+            font-weight: 700;
+            box-shadow: 0 4px 20px rgba(233, 69, 96, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 4px 20px rgba(233, 69, 96, 0.4);
+            }
+            50% {
+                box-shadow: 0 4px 30px rgba(233, 69, 96, 0.8);
+            }
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            font-size: 2em;
+            color: white;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- TOP SECTION: Dealerships (Fixed) -->
+        <div class="top-section">
+            <div class="section-header">
+                <h2>🏢 Active Dealerships</h2>
+                <div class="current-time" id="currentTime"></div>
+            </div>
+            <div class="iframe-container">
+                <!-- Dealership Sheet -->
+                <iframe 
+                    src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSluM2GKD5brkKRlnakPexOjlzZGtrP-5kDnWCQxXrdF6Kh8NXaZ1IT_tosda2dex3ajrIcEXHijvAN/pubhtml?gid=0&single=true&widget=true&headers=false&chrome=false&rm=minimal"
+                    loading="lazy"
+                    scrolling="no">
+                </iframe>
+            </div>
+        </div>
+
+        <!-- BOTTOM SECTION: Rotating (Schedule <-> Performance) -->
+        <div class="bottom-section">
+
+            <!-- Schedule Sheet -->
+            <div class="rotating-content active" id="scheduleContent">
+                <div class="section-header">
+                    <h2>📅 BDC Schedule</h2>
+                    <div class="rotation-indicator" id="rotationIndicator">
+                        Next: Performance (30s)
+                    </div>
+                </div>
+                <div class="iframe-container">
+                    <!-- BDC Schedule Sheet - Automatically shows current month -->
+                    <iframe 
+                        id="scheduleIframe"
+                        src=""
+                        loading="lazy"
+                        scrolling="yes">
+                    </iframe>
+                </div>
+            </div>
+
+            <!-- Performance Sheet -->
+            <div class="rotating-content" id="performanceContent">
+                <div class="section-header">
+                    <h2>📊 BDC Performance</h2>
+                    <div class="rotation-indicator" id="rotationIndicatorPerf">
+                        Next: Schedule (30s)
+                    </div>
+                </div>
+                <div class="iframe-container">
+                    <!-- BDC Performance Sheet -->
+                    <iframe 
+                        src="https://docs.google.com/spreadsheets/d/e/2PACX-1vS9F7_4M99m4wiCWbIxQInBJEdhVv9pKqJ2VVKqvvsC3oUy-mBr6XAJTdJX36PhKNGRVgXuQOwWJav2/pubhtml?widget=true&headers=false&chrome=false&rm=minimal"
+                        loading="lazy"
+                        scrolling="yes">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Month GID mapping - automatically loads correct month
+        const monthGIDs = {
+            0: '0',          // January (you can add this later)
+            1: '0',          // February (you can add this later)
+            2: '0',          // March (you can add this later)
+            3: '0',          // April (you can add this later)
+            4: '890968673',  // May
+            5: '577259706',  // June
+            6: '1955194268', // July
+            7: '1725090455', // August
+            8: '800110370',  // September
+            9: '973226671',  // October
+            10: '777536078', // November
+            11: '2047730813' // December
+        };
+
+        // Get current month and load correct schedule tab
+        function loadCurrentMonthSchedule() {
+            const currentMonth = new Date().getMonth(); // 0-11
+            const gid = monthGIDs[currentMonth];
+            const scheduleURL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vQZR0AGg0KJ5rj6Q6KrcdvmyDAjnI3L30tvOHxEmqg5RvyoXOUxX0IRUT8QYJ_VUUpi6DjSU8c6O_vh/pubhtml?gid=${gid}&widget=true&headers=false&chrome=false&rm=minimal`;
+            document.getElementById('scheduleIframe').src = scheduleURL;
+            console.log(`Loaded schedule for month: ${currentMonth + 1}, GID: ${gid}`);
+        }
+
+        // Update Time Display
+        function updateTime() {
+            const now = new Date();
+            const options = { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            };
+            const time = now.toLocaleTimeString('en-US', options);
+            const date = now.toLocaleDateString('en-US', { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            document.getElementById('currentTime').textContent = `${date} ${time}`;
+        }
+
+        // Rotation Logic
+        let currentView = 0; // 0 = Schedule, 1 = Performance
+        const views = [
+            { id: 'scheduleContent', currentName: 'Schedule', nextName: 'Performance' },
+            { id: 'performanceContent', currentName: 'Performance', nextName: 'Schedule' }
+        ];
+
+        function rotateView() {
+            // Hide current view
+            document.getElementById(views[currentView].id).classList.remove('active');
+            
+            // Move to next view
+            currentView = (currentView + 1) % views.length;
+            
+            // Show next view
+            document.getElementById(views[currentView].id).classList.add('active');
+            
+            // Reset countdown
+            countdown = 30;
+            
+            // Update indicator to show what's coming NEXT
+            updateIndicator();
+        }
+
+        function updateIndicator() {
+            const currentViewData = views[currentView];
+            const text = `Next: ${currentViewData.nextName} (${countdown}s)`;
+            document.getElementById('rotationIndicator').textContent = text;
+            document.getElementById('rotationIndicatorPerf').textContent = text;
+        }
+
+        // Countdown Timer for Rotation Indicator
+        let countdown = 30;
+        function updateCountdown() {
+            countdown--;
+            if (countdown <= 0) {
+                countdown = 30;
+            }
+            updateIndicator();
+        }
+
+        // Initialize
+        loadCurrentMonthSchedule(); // Load correct month's schedule
+        updateTime();
+        
+        // Set intervals
+        setInterval(updateTime, 1000); // Update time every second
+        setInterval(rotateView, 30000); // Rotate every 30 seconds
+        setInterval(updateCountdown, 1000); // Update countdown every second
+
+        // Auto-refresh iframes every 2 minutes to get latest sheet data
+        setInterval(function() {
+            const iframes = document.querySelectorAll('iframe');
+            iframes.forEach(function(iframe) {
+                const src = iframe.src;
+                iframe.src = src;
+            });
+            console.log('Sheets refreshed at ' + new Date().toLocaleTimeString());
+        }, 120000); // 120000ms = 2 minutes
+
+        // Optional: Click to manually rotate (for testing)
+        document.getElementById('rotationIndicator').addEventListener('click', function() {
+            countdown = 30;
+            rotateView();
+        });
+        document.getElementById('rotationIndicatorPerf').addEventListener('click', function() {
+            countdown = 30;
+            rotateView();
+        });
+    </script>
+</body>
+</html>
